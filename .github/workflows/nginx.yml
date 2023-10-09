@@ -34,6 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:38
+      options: "--user root --privileged -v /var/tmp:/var/tmp -v /tmp:/tmp"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
