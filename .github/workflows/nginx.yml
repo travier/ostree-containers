@@ -38,8 +38,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install rpm-ostree & just
-        run: dnf install -y rpm-ostree just
+      - name: Setup container environment
+        run: |
+          dnf install -y rpm-ostree just
+          dnf install -y 'dnf-command(debuginfo-install)'
+          dnf debuginfo-install -y rpm-ostree ostree
 
       - name: Build image
         run: just
