@@ -39,11 +39,9 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup container environment
+      - name: Setup just
         run: |
-          dnf install -y rpm-ostree just distribution-gpg-keys
-          dnf install -y 'dnf-command(debuginfo-install)'
-          dnf debuginfo-install -y rpm-ostree ostree
+          dnf install -y just
 
       - name: Build image
-        run: just
+        run: just github
