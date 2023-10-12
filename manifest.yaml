@@ -1,21 +1,16 @@
 releasever: 38
 
 container: true
-# selinux: false
 
 recommends: false
 
 packages:
   # We are creating a container
   - fedora-release-container
-  # Needed for rpmdb
+  # Needed for regenerating the rpmdb
   - rpm
   # Application to effectively install
   - nginx
-
-# exclude-packages:
-#   - dbus-broker
-#   - systemd
 
 repos:
   - fedora
@@ -25,12 +20,14 @@ postprocess:
   - |
     #!/usr/bin/env bash
     set -xeuo pipefail
-
-    # Remove all systemd configs that we will not be using
-    rm -rf /usr/lib/systemd/ /etc/systemd/
+    # Remove all SUID/SGID binaries
+    find /usr \( -perm -4000 -o -perm -2000 \) -exec rm -fv {} \;
 
 # Remove all docs
+# Remove all systemd configs and units
 remove-files:
   - usr/share/info
   - usr/share/man
   - usr/share/doc
+  - usr/lib/systemd
+  - etc/systemd
