@@ -18,8 +18,12 @@ github:
     make -j4
     cd ..
     mkdir -p cache
-    RUST_BACKTRACE=full ./rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive manifest.yaml nginx.ociarchive
+    RUST_BACKTRACE=full ./rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive nginx.yaml nginx.ociarchive
 
-build:
+# Set a default for some recipes
+default_variant := "base"
+
+build variant=default_variant:
     mkdir -p cache
-    sudo RUST_BACKTRACE=full rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive manifest.yaml nginx.ociarchive
+    # Debug with: RUST_BACKTRACE=full
+    sudo ../../coreos/rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive {{variant}}.yaml {{variant}}.ociarchive

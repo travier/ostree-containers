@@ -1,0 +1,10 @@
+include: common.yaml
+
+packages:
+  # https://bugzilla.redhat.com/show_bug.cgi?id=1409920
+  - tar
+  - vim-minimal
+  - dnf
+  # https://fedorahosted.org/fesco/ticket/1312#comment:29
+  - dnf-yum
+  - sudo
