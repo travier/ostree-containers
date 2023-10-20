@@ -1,5 +1,4 @@
 all:
-    just build common
     just build base
     just build base-minimal
     just build minimal
@@ -23,7 +22,9 @@ github:
     make -j4
     cd ..
     mkdir -p cache
-    RUST_BACKTRACE=full ./rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive nginx.yaml ociarchives/nginx.ociarchive
+    for image in base base-minimal minimal nginx; do
+        RUST_BACKTRACE=full ./rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive $image.yaml ociarchives/$image.ociarchive
+    done
 
 # Set a default for some recipes
 default_variant := "base"
