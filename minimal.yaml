@@ -1,0 +1,24 @@
+releasever: 38
+container: true
+recommends: false
+
+install-langs: ["en_US"]
+
+packages:
+  # We are creating a container
+  - fedora-release-container
+  # Needed for regenerating the rpmdb
+  - rpm
+
+repos:
+  - fedora
+  - fedora-updates
+
+# Remove all docs
+# Remove all systemd configs and units
+remove-files:
+  - usr/share/info
+  - usr/share/man
+  - usr/share/doc
+  - usr/lib/systemd
+  - etc/systemd

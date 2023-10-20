@@ -1,4 +1,9 @@
-all: build
+all:
+    just build common
+    just build base
+    just build base-minimal
+    just build minimal
+    just build nginx
 
 github:
     #!/bin/bash
@@ -18,7 +23,7 @@ github:
     make -j4
     cd ..
     mkdir -p cache
-    RUST_BACKTRACE=full ./rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive nginx.yaml nginx.ociarchive
+    RUST_BACKTRACE=full ./rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive nginx.yaml ociarchives/nginx.ociarchive
 
 # Set a default for some recipes
 default_variant := "base"
@@ -26,4 +31,4 @@ default_variant := "base"
 build variant=default_variant:
     mkdir -p cache
     # Debug with: RUST_BACKTRACE=full
-    sudo ../../coreos/rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive {{variant}}.yaml {{variant}}.ociarchive
+    sudo ../../coreos/rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive {{variant}}.yaml ociarchives/{{variant}}.ociarchive

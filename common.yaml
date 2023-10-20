@@ -1,22 +1,70 @@
 releasever: 38
+
 container: true
 recommends: false
+
+install-langs: ["en_US"]
+
+repos:
+  - fedora
+  - fedora-updates
 
 packages:
   # We are creating a container
   - fedora-release-container
   # Needed for regenerating the rpmdb
   - rpm
+  # Default packages
+  - bash
+  - coreutils
+  - glibc-minimal-langpack
+  - util-linux-core
 
-repos:
-  - fedora
-  - fedora-updates
+exclude-packages:
+  - kernel
+  - dosfstools
+  - e2fsprogs
+  - fuse-libs
+  - gnupg2-smime
+  # Used by e2fsprogs
+  - libss
+  - pinentry
+  - shared-mime-info
+  - trousers
+  - xkeyboard-config
+  - grubby
+  - langpacks-en_GB
+  # https://bugzilla.redhat.com/show_bug.cgi?id=1951111
+  - util-linux
+  - sssd-client
 
-# Remove all docs
-# Remove all systemd configs and units
-remove-files:
-  - usr/share/info
-  - usr/share/man
-  - usr/share/doc
-  - usr/lib/systemd
-  - etc/systemd
+postprocess:
+  - |
+    #!/usr/bin/env bash
+    set -xeuo pipefail
+
+    # Set install langs macro so that new rpms that get installed will
+    # only install langs that we limit it to.
+    LANG="en_US"
+    echo "%_install_langs $LANG" > /etc/rpm/macros.image-language-conf
+
+    # https://bugzilla.redhat.com/show_bug.cgi?id=1727489
+    echo 'LANG="C.UTF-8"' >  /etc/locale.conf
+
+    # https://bugzilla.redhat.com/show_bug.cgi?id=140068
+    echo "Import RPM GPG key"
+    releasever=$(rpm --eval '%{?fedora}')
+    # When building ELN containers, we don't have the %{fedora} macro
+    if [ -z $releasever ]; then
+      releasever=eln
+    fi
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-$releasever-primary
+
+    echo "# fstab intentionally empty for containers" > /etc/fstab
+
+    # Remove machine-id on pre generated images
+    rm -f /etc/machine-id
+    touch /etc/machine-id
+
+    echo "# resolv placeholder" > /etc/resolv.conf
+    chmod 644 /etc/resolv.conf
