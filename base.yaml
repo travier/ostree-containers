@@ -15,6 +15,10 @@ exclude-packages:
   - glibc-langpack-en
   - langpacks-en
 
+# Remove all alternatives config
+remove-files:
+  - usr/lib/alternatives
+
 postprocess:
   - |
     #!/usr/bin/env bash
