@@ -1,24 +1,21 @@
-name: "Build nginx container image"
-
-env:
-  IMAGE_NAME: "nginx"
-  REGISTRY: "quay.io/travier"
+name: "Build container images"
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - manifest.yaml
-      - .github/workflows/nginx.yml
-  push:
-    branches:
-      - main
-    paths:
-      - manifest.yaml
-      - .github/workflows/nginx.yml
-  schedule:
-    - cron:  '0 0 * * MON'
+      - "*.yaml"
+      - ".github/workflows/*.yml"
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - "*.yaml"
+  #     - ".github/workflows/*.yml"
+  # Disabled for now as this is only an experiment
+  # schedule:
+  #   - cron:  '0 0 * * MON'
 
 permissions: read-all
 
@@ -29,8 +26,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  REGISTRY: "quay.io/travier"
+
 jobs:
   build-push-image:
+    # strategy:
+    #   matrix:
+    #     image: ['base', 'base-minimal', 'minimal', 'nginx']
+
     runs-on: ubuntu-latest
     container:
       image: registry.fedoraproject.org/fedora:38
@@ -45,3 +49,4 @@ jobs:
 
       - name: Build image
         run: just github
+        # run: just github ${{ matrix.image }}
