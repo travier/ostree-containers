@@ -10,6 +10,7 @@ packages:
   # https://fedorahosted.org/fesco/ticket/1312#comment:29
   - dnf-yum
   - sudo
+  - tzdata
 
 exclude-packages:
   - glibc-langpack-en
