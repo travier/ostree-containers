@@ -7,6 +7,7 @@ all:
 github:
     #!/bin/bash
     set -euxo pipefail
+    dnf update -y
     dnf install -y rpm-ostree distribution-gpg-keys git
     dnf install -y 'dnf-command(debuginfo-install)'
     dnf debuginfo-install -y rpm-ostree ostree
