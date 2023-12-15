@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/fedora-ostree-desktops/buildroot:latest
-      options: "--user root --privileged"
+      options: "--user root --privileged -v /github/home/:/github/home/:rw"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
