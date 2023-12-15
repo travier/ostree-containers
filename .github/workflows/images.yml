@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/fedora-ostree-desktops/buildroot:latest
-      options: "--user root --privileged -v /github/home/:/github/home/:rw"
+      options: "--user root --privileged -v /tmp:/tmp:rw"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -53,12 +53,12 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.BOT_USERNAME }}
           password: ${{ secrets.BOT_SECRET }}
-          auth_file_path: ~/.docker/config.json
+          auth_file_path: /tmp/config.json
 
       - name: Push image to registry
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
         run: |
-          skopeo copy --authfile=~/.docker/config.json oci-archive:${{ matrix.image }}.ociarchive docker://${{ env.REGISTRY }}/${{ matrix.image }}:latest
+          skopeo copy --authfile=/tmp/config.json oci-archive:${{ matrix.image }}.ociarchive docker://${{ env.REGISTRY }}/${{ matrix.image }}:latest
 
       - uses: sigstore/cosign-installer@v3.2.0
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
