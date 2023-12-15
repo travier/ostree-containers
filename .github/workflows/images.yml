@@ -62,16 +62,17 @@ jobs:
           registry: ${{ env.REGISTRY }}
           tags: latest
 
+      - uses: sigstore/cosign-installer@v3.2.0
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+
       - name: Login to Container Registry
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
-        uses: redhat-actions/podman-login@v1
-        with:
+        run: |
+          podman login ${{ env.REGISTRY }} -u ${{ secrets.BOT_USERNAME }} -p ${{ secrets.BOT_SECRET }} --verbose
+        env:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.BOT_USERNAME }}
           password: ${{ secrets.BOT_SECRET }}
-
-      - uses: sigstore/cosign-installer@v3.2.0
-        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
 
       - name: Sign container image
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
