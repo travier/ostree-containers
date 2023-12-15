@@ -46,6 +46,22 @@ jobs:
         run: |
           rpm-ostree compose image --initialize --format=ociarchive ${{ matrix.image }}.yaml ${{ matrix.image }}.ociarchive
 
+      - name: Copy image to local storage
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+        run: |
+          skopeo copy oci-archive:${{ matrix.image }}.ociarchive containers-storage:${{ matrix.image }}:latest
+
+      - name: Push to Container Registry
+        uses: redhat-actions/push-to-registry@v2
+        id: push
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+        with:
+          username: ${{ secrets.BOT_USERNAME }}
+          password: ${{ secrets.BOT_SECRET }}
+          image: ${{ env.NAME }}
+          registry: ${{ env.REGISTRY }}
+          tags: latest
+
       - name: Login to Container Registry
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
         uses: redhat-actions/podman-login@v1
@@ -53,12 +69,6 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.BOT_USERNAME }}
           password: ${{ secrets.BOT_SECRET }}
-          auth_file_path: /tmp/config.json
-
-      - name: Push image to registry
-        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
-        run: |
-          skopeo copy --authfile=/tmp/config.json oci-archive:${{ matrix.image }}.ociarchive docker://${{ env.REGISTRY }}/${{ matrix.image }}:latest
 
       - uses: sigstore/cosign-installer@v3.2.0
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
