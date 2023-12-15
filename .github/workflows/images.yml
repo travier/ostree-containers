@@ -58,7 +58,7 @@ jobs:
         with:
           username: ${{ secrets.BOT_USERNAME }}
           password: ${{ secrets.BOT_SECRET }}
-          image: ${{ env.NAME }}
+          image: ${{ matrix.image }}
           registry: ${{ env.REGISTRY }}
           tags: latest
 
