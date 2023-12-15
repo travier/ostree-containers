@@ -68,7 +68,7 @@ jobs:
       - name: Login to Container Registry
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
         run: |
-          podman login ${{ env.REGISTRY }} -u ${{ secrets.BOT_USERNAME }} -p ${{ secrets.BOT_SECRET }} --verbose
+          podman login ${{ env.REGISTRY }} -u ${{ secrets.BOT_USERNAME }} -p ${{ secrets.BOT_SECRET }} --verbose --authfile ~/.docker/config.json
         env:
           registry: ${{ env.REGISTRY }}
           username: ${{ secrets.BOT_USERNAME }}
