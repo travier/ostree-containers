@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: quay.io/fedora-ostree-desktops/buildroot:latest
-      options: "--user root --privileged -v /var/tmp:/var/tmp -v /tmp:/tmp"
+      options: "--user root --privileged"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
