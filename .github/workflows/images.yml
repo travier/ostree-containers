@@ -7,15 +7,14 @@ on:
     paths:
       - "*.yaml"
       - ".github/workflows/*.yml"
-  # push:
-  #   branches:
-  #     - main
-  #   paths:
-  #     - "*.yaml"
-  #     - ".github/workflows/*.yml"
-  # Disabled for now as this is only an experiment
-  # schedule:
-  #   - cron:  '0 0 * * MON'
+  push:
+    branches:
+      - main
+    paths:
+      - "*.yaml"
+      - ".github/workflows/*.yml"
+  schedule:
+    - cron:  '0 0 * * MON'
 
 permissions: read-all
 
@@ -27,26 +26,47 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
-  REGISTRY: "quay.io/travier"
+  REGISTRY: "quay.io/fedora-ostree-containers"
 
 jobs:
   build-push-image:
-    # strategy:
-    #   matrix:
-    #     image: ['base', 'base-minimal', 'minimal', 'nginx']
+    strategy:
+      matrix:
+        # image: ['base', 'base-minimal', 'minimal', 'nginx']
+        image: ['base']
 
     runs-on: ubuntu-latest
     container:
-      image: registry.fedoraproject.org/fedora:38
+      image: quay.io/fedora-ostree-desktops/buildroot:latest
       options: "--user root --privileged -v /var/tmp:/var/tmp -v /tmp:/tmp"
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup just
-        run: |
-          dnf install -y just
-
       - name: Build image
-        run: just github
-        # run: just github ${{ matrix.image }}
+        run: |
+          rpm-ostree compose image --initialize --format=ociarchive ${{ matrix.image }}.yaml ${{ matrix.image }}.ociarchive
+
+      - name: Login to Container Registry
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+        uses: redhat-actions/podman-login@v1
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.BOT_USERNAME }}
+          password: ${{ secrets.BOT_SECRET }}
+
+      - name: Push image to registry
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+        run: |
+          skopeo copy oci-archive:${{ matrix.image }}.ociarchive docker://${{ env.REGISTRY }}/${{ matrix.image }}:latest
+
+      - uses: sigstore/cosign-installer@v3.2.0
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+
+      - name: Sign container image
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+        run: |
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ matrix.image }}:latest
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
