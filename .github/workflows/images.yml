@@ -32,8 +32,7 @@ jobs:
   build-push-image:
     strategy:
       matrix:
-        # image: ['base', 'base-minimal', 'minimal', 'nginx']
-        image: ['base']
+        image: ['base', 'base-minimal', 'minimal', 'nginx']
 
     runs-on: ubuntu-latest
     container:
