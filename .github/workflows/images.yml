@@ -44,7 +44,7 @@ jobs:
 
       - name: Build image
         run: |
-          rpm-ostree compose image --initialize --format=ociarchive ${{ matrix.image }}.yaml ${{ matrix.image }}.ociarchive
+          rpm-ostree compose image --initialize --format=ociarchive --image-config=config.json ${{ matrix.image }}.yaml ${{ matrix.image }}.ociarchive
 
       - name: Copy image to local storage
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
