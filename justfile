@@ -4,6 +4,7 @@ all:
     just build minimal
     just build nginx
 
+# Full rpm-ostree & ostree-rs-ext from source build & test
 github:
     #!/bin/bash
     set -euxo pipefail
@@ -29,8 +30,7 @@ github:
 
 # Set a default for some recipes
 default_variant := "base"
+default_release := "39"
 
-build variant=default_variant:
-    mkdir -p cache ociarchives
-    # Debug with: RUST_BACKTRACE=full
-    sudo ../../coreos/rpm-ostree/rpm-ostree compose image --cachedir=cache --initialize --format=ociarchive {{variant}}.yaml ociarchives/{{variant}}.ociarchive
+build variant=default_variant release=default_release:
+    sudo rpm-ostree compose image --initialize --format=ociarchive --image-config={{release}}/config.json {{release}}/{{variant}}.yaml {{variant}}-{{release}}.ociarchive
