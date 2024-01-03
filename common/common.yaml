@@ -1,13 +1,7 @@
-releasever: 39
-
 container: true
 recommends: false
 
 install-langs: ["en_US"]
-
-repos:
-  - fedora
-  - fedora-updates
 
 packages:
   # We are creating a container
@@ -39,7 +33,6 @@ exclude-packages:
   - sssd-client
 
 # Remove all docs
-# Remove all systemd configs and units
 remove-files:
   - usr/share/doc
   - usr/share/info
@@ -95,5 +88,3 @@ postprocess:
 
     # Cleanup authselect vendor dir
     rm -rf /usr/share/authselect/vendor/*
-
-

@@ -1,0 +1,16 @@
+{
+    "Env": [
+        "DISTTAG=f40container",
+        "FGC=f40",
+        "container=oci"
+    ],
+    "Cmd": [
+        "/bin/bash"
+    ],
+    "Labels": {
+        "license": "MIT",
+        "name": "fedora",
+        "vendor": "Fedora Project",
+        "version": "40"
+    }
+}

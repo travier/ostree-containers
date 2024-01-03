@@ -27,12 +27,14 @@ concurrency:
 
 env:
   REGISTRY: "quay.io/fedora-ostree-containers"
+  latest_release: "39"
 
 jobs:
   build-push-image:
     strategy:
       matrix:
         image: ['base', 'base-minimal', 'minimal', 'nginx']
+        release: ['38', '39', '40']
 
     runs-on: ubuntu-latest
     container:
@@ -44,23 +46,35 @@ jobs:
 
       - name: Build image
         run: |
-          rpm-ostree compose image --initialize --format=ociarchive --image-config=config.json ${{ matrix.image }}.yaml ${{ matrix.image }}.ociarchive
+          rpm-ostree compose image --initialize --format=ociarchive --image-config=${{ matrix.release }}/config.json ${{ matrix.release }}/${{ matrix.image }}.yaml ${{ matrix.image }}-${{ matrix.release }}.ociarchive
 
       - name: Copy image to local storage
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
         run: |
-          skopeo copy oci-archive:${{ matrix.image }}.ociarchive containers-storage:${{ matrix.image }}:latest
+          skopeo copy oci-archive:${{ matrix.image }}-${{ matrix.release }}.ociarchive containers-storage:${{ matrix.image }}:${{ matrix.release }}
+          rm ${{ matrix.image }}-${{ matrix.release }}.ociarchive
 
       - name: Push to Container Registry
         uses: redhat-actions/push-to-registry@v2
         id: push
-        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' && env.latest_release != matrix.release
         with:
           username: ${{ secrets.BOT_USERNAME }}
           password: ${{ secrets.BOT_SECRET }}
           image: ${{ matrix.image }}
           registry: ${{ env.REGISTRY }}
-          tags: latest
+          tags: ${{ matrix.release }}
+
+      - name: Push to Container Registry (latest)
+        uses: redhat-actions/push-to-registry@v2
+        id: push
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' && env.latest_release == matrix.release
+        with:
+          username: ${{ secrets.BOT_USERNAME }}
+          password: ${{ secrets.BOT_SECRET }}
+          image: ${{ matrix.image }}
+          registry: ${{ env.REGISTRY }}
+          tags: ${{ matrix.release }} latest
 
       - uses: sigstore/cosign-installer@v3.2.0
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
@@ -75,7 +89,15 @@ jobs:
           password: ${{ secrets.BOT_SECRET }}
 
       - name: Sign container image
-        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main'
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' && env.latest_release != matrix.release
+        run: |
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ matrix.image }}:${{ matrix.release }}
+        env:
+          COSIGN_EXPERIMENTAL: false
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+
+      - name: Sign container image (latest)
+        if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' && env.latest_release == matrix.release
         run: |
           cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ matrix.image }}:latest
         env:

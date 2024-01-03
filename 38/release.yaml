@@ -1,0 +1,5 @@
+release: "38"
+
+repos:
+  - fedora
+  - fedora-updates

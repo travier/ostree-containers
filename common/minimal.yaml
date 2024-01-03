@@ -1,4 +1,3 @@
-releasever: 39
 container: true
 recommends: false
 
@@ -9,10 +8,6 @@ packages:
   - fedora-release-container
   # Needed for regenerating the rpmdb
   - rpm
-
-repos:
-  - fedora
-  - fedora-updates
 
 # https://fedoraproject.org/wiki/Changes/AllowRemovalOfTzdata
 exclude-packages:

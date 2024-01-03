@@ -1,0 +1,5 @@
+release: "40"
+
+repos:
+  - fedora
+  - fedora-updates

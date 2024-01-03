@@ -1,0 +1,4 @@
+release: "40"
+
+repos:
+  - fedora-rawhide
