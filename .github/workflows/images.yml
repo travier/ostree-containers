@@ -67,7 +67,7 @@ jobs:
 
       - name: Push to Container Registry (latest)
         uses: redhat-actions/push-to-registry@v2
-        id: push
+        id: push-latest
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' && env.latest_release == matrix.release
         with:
           username: ${{ secrets.BOT_USERNAME }}
@@ -91,7 +91,7 @@ jobs:
       - name: Sign container image
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' && env.latest_release != matrix.release
         run: |
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ matrix.image }}:${{ matrix.release }}
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ matrix.image }}@${{ steps.push.outputs.digest }}
         env:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
@@ -99,7 +99,7 @@ jobs:
       - name: Sign container image (latest)
         if: (github.event_name == 'push' || github.event_name == 'schedule') && github.ref == 'refs/heads/main' && env.latest_release == matrix.release
         run: |
-          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ matrix.image }}:latest
+          cosign sign -y --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ matrix.image }}@${{ steps.push-latest.outputs.digest }}
         env:
           COSIGN_EXPERIMENTAL: false
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
