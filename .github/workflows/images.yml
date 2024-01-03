@@ -4,15 +4,19 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - "*.yaml"
-      - ".github/workflows/*.yml"
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+      - 'justfile'
   push:
     branches:
       - main
-    paths:
-      - "*.yaml"
-      - ".github/workflows/*.yml"
+    paths-ignore:
+      - '.gitignore'
+      - 'LICENSE'
+      - 'README.md'
+      - 'justfile'
   schedule:
     - cron:  '0 0 * * MON'
 
