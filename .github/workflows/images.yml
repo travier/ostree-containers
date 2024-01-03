@@ -38,8 +38,7 @@ jobs:
     strategy:
       matrix:
         image: ['base', 'base-minimal', 'minimal', 'nginx']
-        # release: ['38', '39', '40']
-        release: ['39', '40']
+        release: ['38', '39', '40']
 
     runs-on: ubuntu-latest
     container:
