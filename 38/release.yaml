@@ -1,4 +1,4 @@
-release: "38"
+releasever: "38"
 
 repos:
   - fedora
